@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PyBank — Banco Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #F5F2ED;
+      --surface: #FFFFFF;
+      --surface-2: #F0EDE7;
+      --border: #E4DFD7;
+      --text-primary: #1A1714;
+      --text-secondary: #6B6560;
+      --text-muted: #A09891;
+      --accent: #2D5016;
+      --accent-light: #4A8A24;
+      --accent-pale: #EAF2E0;
+      --red: #C0392B;
+      --red-pale: #FDECEA;
+      --gold: #B8860B;
+      --gold-pale: #FDF6E3;
+      --shadow-sm: 0 1px 3px rgba(26,23,20,0.06), 0 1px 2px rgba(26,23,20,0.04);
+      --shadow-md: 0 4px 16px rgba(26,23,20,0.08), 0 2px 4px rgba(26,23,20,0.04);
+      --shadow-lg: 0 12px 40px rgba(26,23,20,0.10), 0 4px 8px rgba(26,23,20,0.05);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 28px 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo {
+      padding: 0 28px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-mark {
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-icon svg { width: 20px; height: 20px; fill: white; }
+
+    .logo-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-name span { color: var(--accent-light); }
+
+    .nav {
+      flex: 1;
+      padding: 20px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .nav-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: 12px 12px 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      color: var(--text-secondary);
+      font-size: 14px; font-weight: 500;
+      text-decoration: none;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+
+    .nav-item:hover { background: var(--surface-2); color: var(--text-primary); }
+
+    .nav-item.active {
+      background: var(--accent-pale);
+      color: var(--accent);
+    }
+
+    .nav-item svg {
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .nav-item.active svg { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 20px 16px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+    }
+
+    .avatar {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: white;
+    }
+
+    .user-info { flex: 1; overflow: hidden; }
+    .user-name { font-size: 13px; font-weight: 600; truncate; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 240px;
+      min-height: 100vh;
+      padding: 40px 40px 60px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      letter-spacing: -0.5px;
+    }
+
+    .page-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+
+    .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s ease;
+      color: var(--text-secondary);
+    }
+
+    .btn-icon:hover { background: var(--surface-2); color: var(--text-primary); }
+    .btn-icon svg { width: 18px; height: 18px; }
+
+    .notification-dot {
+      position: relative;
+    }
+    .notification-dot::after {
+      content: ''; position: absolute; top: 8px; right: 8px;
+      width: 7px; height: 7px;
+      background: var(--accent-light); border-radius: 50%;
+      border: 2px solid var(--surface);
+    }
+
+    /* ── CARDS ── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+    .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card:hover { box-shadow: var(--shadow-md); }
+
+    /* ── BALANCE HERO CARD ── */
+    .balance-card {
+      background: var(--accent);
+      border-radius: var(--radius);
+      padding: 32px;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      grid-column: span 2;
+    }
+
+    .balance-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .balance-card::after {
+      content: '';
+      position: absolute; bottom: -30px; right: 60px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .balance-label {
+      font-size: 12px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1.2px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 42px;
+      color: white;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+
+    .balance-amount.negative { color: #FF8A80; }
+
+    .balance-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative; z-index: 1;
+    }
+
+    .balance-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px; color: rgba(255,255,255,0.85);
+    }
+
+    .card-actions-row {
+      display: flex; gap: 8px;
+    }
+
+    .btn-card-action {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: white;
+      font-size: 12px; font-weight: 500;
+      padding: 6px 14px;
+      cursor: pointer; transition: background 0.15s;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .btn-card-action:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── STAT CARDS ── */
+    .stat-card { display: flex; flex-direction: column; gap: 12px; }
+
+    .stat-header { display: flex; align-items: center; justify-content: space-between; }
+
+    .stat-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .stat-icon.green { background: var(--accent-pale); color: var(--accent); }
+    .stat-icon.red { background: var(--red-pale); color: var(--red); }
+    .stat-icon.gold { background: var(--gold-pale); color: var(--gold); }
+    .stat-icon svg { width: 18px; height: 18px; }
+
+    .stat-badge {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px;
+    }
+
+    .stat-badge.up { background: var(--accent-pale); color: var(--accent); }
+    .stat-badge.down { background: var(--red-pale); color: var(--red); }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px; letter-spacing: -0.5px;
+    }
+
+    .stat-label { font-size: 13px; color: var(--text-muted); }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title { font-size: 16px; font-weight: 600; }
+    .section-link {
+      font-size: 13px; color: var(--accent-light); font-weight: 500;
+      cursor: pointer; text-decoration: none;
+    }
+
+    /* ── TRANSACTIONS ── */
+    .tx-list { display: flex; flex-direction: column; gap: 2px; }
+
+    .tx-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .tx-item:hover { background: var(--surface-2); }
+
+    .tx-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+
+    .tx-info { flex: 1; min-width: 0; }
+    .tx-name { font-size: 14px; font-weight: 500; }
+    .tx-date { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .tx-amount {
+      font-size: 14px; font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tx-amount.credit { color: var(--accent-light); }
+    .tx-amount.debit { color: var(--text-primary); }
+
+    /* ── INVESTMENTS ── */
+    .invest-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .invest-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      cursor: pointer; transition: all 0.15s;
+    }
+
+    .invest-item:hover { background: var(--border); }
+
+    .invest-logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      color: var(--accent); border: 1px solid var(--border);
+    }
+
+    .invest-info { flex: 1; }
+    .invest-name { font-size: 13px; font-weight: 600; }
+    .invest-ticker { font-size: 11px; color: var(--text-muted); }
+
+    .invest-price { text-align: right; }
+    .invest-value { font-size: 14px; font-weight: 600; }
+    .invest-change { font-size: 11px; font-weight: 500; }
+    .invest-change.up { color: var(--accent-light); }
+    .invest-change.down { color: var(--red); }
+
+    /* ── QUICK ACTIONS ── */
+    .quick-actions {
+      display: grid; grid-template-columns: repeat(2,1fr); gap: 10px;
+    }
+
+    .action-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 18px 12px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.15s;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .action-btn:hover {
+      background: var(--accent-pale);
+      border-color: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    .action-btn svg { width: 22px; height: 22px; color: var(--accent); }
+    .action-btn span { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(26,23,20,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none; align-items: center; justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 32px;
+      width: 420px;
+      max-width: 90vw;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+    }
+
+    .modal-close {
+      width: 32px; height: 32px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: all 0.15s;
+    }
+
+    .modal-close:hover { background: var(--surface-2); color: var(--text-primary); }
+
+    .form-group { margin-bottom: 18px; }
+
+    .form-label {
+      display: block;
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px; color: var(--text-primary);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .form-input:focus { border-color: var(--accent-light); }
+
+    .amount-options {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .amount-chip {
+      padding: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      background: none; color: var(--text-primary);
+    }
+
+    .amount-chip:hover, .amount-chip.selected {
+      border-color: var(--accent-light);
+      background: var(--accent-pale);
+      color: var(--accent);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: white;
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+
+    .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ── TOAST ── */
+    .toast-container {
+      position: fixed; bottom: 28px; right: 28px;
+      z-index: 300;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .toast {
+      background: var(--text-primary);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: var(--shadow-lg);
+      animation: slideInRight 0.3s ease;
+    }
+
+    .toast.success { background: var(--accent); }
+    .toast.error { background: var(--red); }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ── TABS ── */
+    .tab-bar {
+      display: flex; gap: 4px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 7px; border: none; background: none;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      color: var(--text-muted);
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; animation: fadeInPage 0.25s ease; }
+    @keyframes fadeInPage { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── STATEMENT TABLE ── */
+    .statement-table { width: 100%; border-collapse: collapse; }
+    .statement-table th {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-muted);
+      padding: 10px 16px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .statement-table td {
+      padding: 14px 16px; font-size: 14px;
+      border-bottom: 1px solid var(--surface-2);
+    }
+
+    .statement-table tr:last-child td { border-bottom: none; }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 500;
+    }
+
+    .tag.saque { background: var(--red-pale); color: var(--red); }
+    .tag.deposito { background: var(--accent-pale); color: var(--accent); }
+    .tag.investimento { background: var(--gold-pale); color: var(--gold); }
+
+    /* ── PIX CARD ── */
+    .pix-keys {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .pix-key-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+    }
+
+    .pix-key-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--accent-pale);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+
+    .pix-key-icon svg { width: 18px; height: 18px; }
+    .pix-key-type { font-size: 13px; font-weight: 600; }
+    .pix-key-value { font-size: 12px; color: var(--text-muted); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { margin-top: 10px; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .progress-bar { height: 6px; background: var(--surface-2); border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 10px; background: var(--accent-light); transition: width 0.6s ease; }
+
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v3h20V7L12 2zm0 2.18L19.39 8H4.61L12 4.18zM2 22h20v-2H2v2zm0-4h20v-2H2v2zm0-4h20v-8H2v8zm2-6h16v4H4v-4z"/></svg>
+      </div>
+      <span class="logo-name">Py<span>Bank</span></span>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <button class="nav-item active" onclick="showPage('dashboard')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('extrato')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      Extrato
+    </button>
+    <button class="nav-item" onclick="showPage('investimentos')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+      Investimentos
+    </button>
+    <button class="nav-item" onclick="showPage('pix')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+      Pix
+    </button>
+    <div class="nav-label">Conta</div>
+    <button class="nav-item" onclick="showPage('perfil')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Meu Perfil
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="avatar" id="avatarInitial">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Usuário</div>
+        <div class="user-role">Conta Corrente</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="welcomeTitle">Olá, Usuário 👋</div>
+        <div class="page-subtitle" id="welcomeDate">Carregando...</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon notification-dot" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <!-- Balance Card -->
+      <div class="card balance-card">
+        <div class="balance-label">Saldo disponível</div>
+        <div class="balance-amount" id="heroBal">R$ 0,00</div>
+        <div class="balance-footer">
+          <div class="balance-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Conta ativa
+          </div>
+          <div class="card-actions-row">
+            <button class="btn-card-action" onclick="openModal('deposito')">+ Depositar</button>
+            <button class="btn-card-action" onclick="openModal('saque')">Sacar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="card stat-card">
+        <div class="stat-header">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>
+          </div>
+          <span class="stat-badge up" id="depositBadge">+0</span>
+        </div>
+        <div class="stat-value" id="totalDepositos">R$ 0</div>
+        <div class="stat-label">Total depositado</div>
+      </div>
+
+      <div class="card stat-card">
+        <div class="stat-header">
+          <div class="stat-icon red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+          </div>
+          <span class="stat-badge down" id="saqueBadge">-0</span>
+        </div>
+        <div class="stat-value" id="totalSaques">R$ 0</div>
+        <div class="stat-label">Total sacado</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Transactions -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Últimas movimentações</div>
+          <a class="section-link" onclick="showPage('extrato')">Ver todas →</a>
+        </div>
+        <div class="tx-list" id="txList">
+          <div style="text-align:center; padding: 32px; color: var(--text-muted); font-size: 14px;">
+            Nenhuma movimentação ainda
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="section-header" style="margin-bottom: 16px;">
+            <div class="section-title">Ações rápidas</div>
+          </div>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="openModal('deposito')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>
+              <span>Depositar</span>
+            </button>
+            <button class="action-btn" onclick="openModal('saque')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+              <span>Sacar</span>
+            </button>
+            <button class="action-btn" onclick="openModal('investir')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+              <span>Investir</span>
+            </button>
+            <button class="action-btn" onclick="showPage('pix')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+              <span>Área Pix</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Goal -->
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px;">Meta de economia</div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Reserva de emergência</div>
+          <div class="progress-wrap">
+            <div class="progress-labels">
+              <span id="progressLabel">R$ 0</span>
+              <span>Meta: R$ 5.000</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTRATO -->
+  <div class="page" id="page-extrato">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Extrato</div>
+        <div class="page-subtitle">Histórico completo de movimentações</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="filterExtrato('all', this)">Todos</button>
+        <button class="tab-btn" onclick="filterExtrato('deposito', this)">Depósitos</button>
+        <button class="tab-btn" onclick="filterExtrato('saque', this)">Saques</button>
+        <button class="tab-btn" onclick="filterExtrato('investimento', this)">Investimentos</button>
+      </div>
+      <table class="statement-table">
+        <thead>
+          <tr>
+            <th>Operação</th>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th style="text-align:right">Valor</th>
+            <th style="text-align:right">Saldo</th>
+          </tr>
+        </thead>
+        <tbody id="extratoBody">
+          <tr><td colspan="5" style="text-align:center; padding:32px; color:var(--text-muted)">Nenhuma movimentação registrada</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INVESTIMENTOS -->
+  <div class="page" id="page-investimentos">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Investimentos</div>
+        <div class="page-subtitle">Bolsa de valores simulada</div>
+      </div>
+      <button class="btn-icon" onclick="openModal('investir')" style="width:auto; padding:0 16px; font-family:Sora,sans-serif; font-size:13px; font-weight:600; color:var(--accent);">
+        + Comprar cotas
+      </button>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-header"><div class="section-title">Empresas disponíveis</div></div>
+        <div class="invest-list" id="investList"></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px;">Minha carteira</div>
+        <div id="carteiraEmpty" style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">
+          Você ainda não possui investimentos
+        </div>
+        <div class="invest-list" id="carteiraList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIX -->
+  <div class="page" id="page-pix">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Área Pix</div>
+        <div class="page-subtitle">Transferências instantâneas</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:20px;">Transferir via Pix</div>
+        <div class="form-group">
+          <label class="form-label">Chave Pix do destinatário</label>
+          <input type="text" class="form-input" id="pixKeyInput" placeholder="CPF, e-mail ou telefone..."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor</label>
+          <input type="number" class="form-input" id="pixAmount" placeholder="R$ 0,00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição (opcional)</label>
+          <input type="text" class="form-input" id="pixDesc" placeholder="Ex: Pagamento jantar"/>
+        </div>
+        <button class="btn-primary" onclick="enviarPix()">Transferir agora</button>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px;">Minhas chaves Pix</div>
+        <div class="pix-keys">
+          <div class="pix-key-item">
+            <div class="pix-key-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            </div>
+            <div>
+              <div class="pix-key-type">CPF</div>
+              <div class="pix-key-value">***.456.789-**</div>
+            </div>
+          </div>
+          <div class="pix-key-item">
+            <div class="pix-key-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </div>
+            <div>
+              <div class="pix-key-type">E-mail</div>
+              <div class="pix-key-value" id="pixEmailKey">usuario@email.com</div>
+            </div>
+          </div>
+          <div class="pix-key-item">
+            <div class="pix-key-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            </div>
+            <div>
+              <div class="pix-key-type">Telefone</div>
+              <div class="pix-key-value">+55 (11) 9****-****</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="page" id="page-perfil">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Meu Perfil</div>
+        <div class="page-subtitle">Gerencie suas informações</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:28px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:white;" id="profileAvatar">?</div>
+          <div>
+            <div style="font-family:'DM Serif Display',serif;font-size:22px;" id="profileName">Usuário</div>
+            <div style="font-size:13px;color:var(--text-muted);">Conta Corrente • PyBank</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="padding:14px 16px;background:var(--surface-2);border-radius:var(--radius-sm);">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:4px;">Agência</div>
+            <div style="font-size:15px;font-weight:600;">0001</div>
+          </div>
+          <div style="padding:14px 16px;background:var(--surface-2);border-radius:var(--radius-sm);">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:4px;">Conta</div>
+            <div style="font-size:15px;font-weight:600;" id="profileAccount">------</div>
+          </div>
+          <div style="padding:14px 16px;background:var(--surface-2);border-radius:var(--radius-sm);">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:4px;">Saldo atual</div>
+            <div style="font-size:15px;font-weight:600;" id="profileBal">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:20px;">Sobre o projeto</div>
+        <div style="font-size:14px;color:var(--text-secondary);line-height:1.7;">
+          <p style="margin-bottom:12px;">O <strong>PyBank</strong> é um sistema bancário simulado, desenvolvido em <strong>Python</strong>, com funcionalidades de saque, depósito e investimentos em ações.</p>
+          <p style="margin-bottom:12px;">Esta interface foi criada em <strong>HTML/CSS/JS puro</strong> para demonstrar como o sistema funciona visualmente, ideal para portfólio no GitHub e LinkedIn.</p>
+          <p>Desenvolvido com foco em boas práticas de código, modularidade e experiência do usuário.</p>
+        </div>
+        <div style="margin-top:24px;display:flex;gap:10px;">
+          <a href="https://github.com" target="_blank" class="btn-primary" style="text-align:center;text-decoration:none;display:block;padding:12px;">
+            Ver no GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay open" id="loginOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Bem-vindo ao PyBank</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Seu nome</label>
+      <input type="text" class="form-input" id="loginName" placeholder="Ex: João Silva" autofocus/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Data de nascimento (senha)</label>
+      <input type="text" class="form-input" id="loginPass" placeholder="Ex: 070307"/>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Entrar na conta</button>
+  </div>
+</div>
+
+<!-- SAQUE MODAL -->
+<div class="modal-overlay" id="modalSaque">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Realizar saque</div>
+      <button class="modal-close" onclick="closeModal('modalSaque')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Escolha o valor</label>
+      <div class="amount-options">
+        <button class="amount-chip" onclick="selectAmount(this, 10)">R$ 10</button>
+        <button class="amount-chip" onclick="selectAmount(this, 50)">R$ 50</button>
+        <button class="amount-chip" onclick="selectAmount(this, 100)">R$ 100</button>
+        <button class="amount-chip" onclick="selectAmount(this, 500)">R$ 500</button>
+        <button class="amount-chip" onclick="selectAmount(this, 1000)">R$ 1.000</button>
+        <button class="amount-chip" onclick="selectAmount(this, 0)" id="customChip">Outro</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor selecionado</label>
+      <input type="number" class="form-input" id="saqueInput" placeholder="R$ 0,00"/>
+    </div>
+    <button class="btn-primary" onclick="efetuarSaque()">Confirmar saque</button>
+  </div>
+</div>
+
+<!-- DEPOSITO MODAL -->
+<div class="modal-overlay" id="modalDeposito">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Realizar depósito</div>
+      <button class="modal-close" onclick="closeModal('modalDeposito')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor do depósito</label>
+      <input type="number" class="form-input" id="depositoInput" placeholder="R$ 0,00"/>
+    </div>
+    <button class="btn-primary" onclick="efetuarDeposito()">Confirmar depósito</button>
+  </div>
+</div>
+
+<!-- INVESTIR MODAL -->
+<div class="modal-overlay" id="modalInvestir">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Comprar cotas</div>
+      <button class="modal-close" onclick="closeModal('modalInvestir')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Empresa</label>
+      <select class="form-input" id="investEmpresa">
+        <option value="">Selecione...</option>
+        <option value="Banco do Brasil|32.56">Banco do Brasil — R$ 32,56</option>
+        <option value="Petrobras|28.90">Petrobras — R$ 28,90</option>
+        <option value="Vale|55.30">Vale — R$ 55,30</option>
+        <option value="Itaú|34.75">Itaú — R$ 34,75</option>
+        <option value="Ambev|12.40">Ambev — R$ 12,40</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantidade de cotas</label>
+      <input type="number" class="form-input" id="investQtd" placeholder="Ex: 10" min="1"/>
+    </div>
+    <div id="investTotal" style="padding:12px 16px;background:var(--accent-pale);border-radius:var(--radius-sm);font-size:14px;font-weight:600;color:var(--accent);margin-bottom:18px;display:none;"></div>
+    <button class="btn-primary" onclick="efetuarInvestimento()">Confirmar compra</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ── STATE ──
+  let state = {
+    nome: '',
+    saldo: 0,
+    totalDepositado: 0,
+    totalSacado: 0,
+    transacoes: [],
+    carteira: {}
+  };
+
+  const empresas = {
+    "Banco do Brasil": { ticker: "BBAS3", preco: 32.56, change: +2.1 },
+    "Petrobras":       { ticker: "PETR4", preco: 28.90, change: -1.3 },
+    "Vale":            { ticker: "VALE3", preco: 55.30, change: +0.8 },
+    "Itaú":            { ticker: "ITUB4", preco: 34.75, change: +1.5 },
+    "Ambev":           { ticker: "ABEV3", preco: 12.40, change: -0.4 }
+  };
+
+  const txIcons = {
+    deposito: { icon: '💰', bg: '#EAF2E0' },
+    saque:    { icon: '💸', bg: '#FDECEA' },
+    investimento: { icon: '📈', bg: '#FDF6E3' },
+    pix:      { icon: '⚡', bg: '#EAF2E0' }
+  };
+
+  // ── LOGIN ──
+  function doLogin() {
+    const n = document.getElementById('loginName').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    if (!n || !p) { showToast('Preencha todos os campos', 'error'); return; }
+
+    state.nome = n;
+    state.saldo = (Math.random() * 9000 - 1000);
+
+    document.getElementById('loginOverlay').classList.remove('open');
+    document.getElementById('sidebarName').textContent = n.split(' ')[0];
+    document.getElementById('avatarInitial').textContent = n[0].toUpperCase();
+    document.getElementById('profileAvatar').textContent = n[0].toUpperCase();
+    document.getElementById('profileName').textContent = n;
+    document.getElementById('profileAccount').textContent = Math.floor(Math.random()*90000+10000) + '-' + Math.floor(Math.random()*9);
+
+    // Set pix email
+    document.getElementById('pixEmailKey').textContent = n.toLowerCase().replace(' ','') + '@pybank.com';
+
+    updateUI();
+    renderInvestList();
+    showToast(`Bem-vindo, ${n.split(' ')[0]}! 🎉`, 'success');
+  }
+
+  // ── UI UPDATES ──
+  function formatBRL(v) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  }
+
+  function updateUI() {
+    const bal = state.saldo;
+    const heroEl = document.getElementById('heroBal');
+    heroEl.textContent = formatBRL(bal);
+    heroEl.className = 'balance-amount' + (bal < 0 ? ' negative' : '');
+
+    document.getElementById('profileBal').textContent = formatBRL(bal);
+    document.getElementById('totalDepositos').textContent = formatBRL(state.totalDepositado);
+    document.getElementById('totalSaques').textContent = formatBRL(state.totalSacado);
+    document.getElementById('depositBadge').textContent = '+' + state.transacoes.filter(t=>t.tipo==='deposito').length;
+    document.getElementById('saqueBadge').textContent = '-' + state.transacoes.filter(t=>t.tipo==='saque').length;
+
+    // Progress
+    const pct = Math.min(100, Math.max(0, (bal / 5000) * 100));
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = formatBRL(Math.max(0, bal));
+
+    renderTxList();
+    renderExtrato();
+  }
+
+  function renderTxList() {
+    const el = document.getElementById('txList');
+    const txs = [...state.transacoes].reverse().slice(0, 5);
+    if (!txs.length) {
+      el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:14px;">Nenhuma movimentação ainda</div>';
+      return;
+    }
+    el.innerHTML = txs.map(t => `
+      <div class="tx-item">
+        <div class="tx-icon" style="background:${txIcons[t.tipo].bg}">${txIcons[t.tipo].icon}</div>
+        <div class="tx-info">
+          <div class="tx-name">${t.desc}</div>
+          <div class="tx-date">${t.data}</div>
+        </div>
+        <div class="tx-amount ${t.tipo==='deposito'||t.tipo==='pix'&&t.valor>0?'credit':'debit'}">
+          ${t.tipo==='deposito'||t.tipo==='pix'&&t.valor>0?'+':''}${formatBRL(Math.abs(t.valor))}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  let extratoFilter = 'all';
+
+  function renderExtrato(filter) {
+    if (filter) extratoFilter = filter;
+    const el = document.getElementById('extratoBody');
+    const txs = [...state.transacoes].reverse().filter(t => extratoFilter === 'all' || t.tipo === extratoFilter);
+    if (!txs.length) {
+      el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Nenhuma movimentação registrada</td></tr>';
+      return;
+    }
+    el.innerHTML = txs.map(t => `
+      <tr>
+        <td style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">${txIcons[t.tipo].icon}</span>
+          <span>${t.desc}</span>
+        </td>
+        <td style="color:var(--text-muted)">${t.data}</td>
+        <td><span class="tag ${t.tipo}">${t.tipo}</span></td>
+        <td style="text-align:right;font-weight:600;color:${t.tipo==='deposito'?'var(--accent-light)':'var(--text-primary)'}">
+          ${t.tipo==='deposito'?'+':'−'}${formatBRL(Math.abs(t.valor))}
+        </td>
+        <td style="text-align:right;font-weight:500;">${formatBRL(t.saldoApos)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function filterExtrato(f, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderExtrato(f);
+  }
+
+  function renderInvestList() {
+    const el = document.getElementById('investList');
+    el.innerHTML = Object.entries(empresas).map(([nome, e]) => `
+      <div class="invest-item" onclick="openModal('investir')">
+        <div class="invest-logo">${e.ticker.slice(0,2)}</div>
+        <div class="invest-info">
+          <div class="invest-name">${nome}</div>
+          <div class="invest-ticker">${e.ticker}</div>
+        </div>
+        <div class="invest-price">
+          <div class="invest-value">${formatBRL(e.preco)}</div>
+          <div class="invest-change ${e.change>=0?'up':'down'}">${e.change>=0?'▲':'▼'} ${Math.abs(e.change)}%</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderCarteira() {
+    const el = document.getElementById('carteiraList');
+    const empty = document.getElementById('carteiraEmpty');
+    const entries = Object.entries(state.carteira);
+    if (!entries.length) { empty.style.display='block'; el.innerHTML=''; return; }
+    empty.style.display='none';
+    el.innerHTML = entries.map(([nome, d]) => {
+      const atual = empresas[nome].preco * d.qtd;
+      const diff = atual - d.custo;
+      return `
+        <div class="invest-item">
+          <div class="invest-logo">${empresas[nome].ticker.slice(0,2)}</div>
+          <div class="invest-info">
+            <div class="invest-name">${nome}</div>
+            <div class="invest-ticker">${d.qtd} cotas</div>
+          </div>
+          <div class="invest-price">
+            <div class="invest-value">${formatBRL(atual)}</div>
+            <div class="invest-change ${diff>=0?'up':'down'}">${diff>=0?'+':''}${formatBRL(diff)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── MODALS ──
+  function openModal(type) {
+    if (type === 'saque') document.getElementById('modalSaque').classList.add('open');
+    else if (type === 'deposito') document.getElementById('modalDeposito').classList.add('open');
+    else if (type === 'investir') document.getElementById('modalInvestir').classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o && o.id !== 'loginOverlay') closeModal(o.id); });
+  });
+
+  function selectAmount(btn, val) {
+    document.querySelectorAll('.amount-chip').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    if (val > 0) document.getElementById('saqueInput').value = val;
+    else document.getElementById('saqueInput').focus();
+  }
+
+  // ── OPERATIONS ──
+  function addTx(tipo, desc, valor) {
+    state.transacoes.push({ tipo, desc, valor, data: new Date().toLocaleDateString('pt-BR'), saldoApos: state.saldo });
+  }
+
+  function efetuarSaque() {
+    const val = parseFloat(document.getElementById('saqueInput').value);
+    if (!val || val <= 0) { showToast('Informe um valor válido', 'error'); return; }
+    if (state.saldo < val) { showToast('Saldo insuficiente!', 'error'); return; }
+    if (val < 10) { showToast('Valor mínimo: R$ 10,00', 'error'); return; }
+    state.saldo -= val;
+    state.totalSacado += val;
+    addTx('saque', `Saque de ${formatBRL(val)}`, val);
+    closeModal('modalSaque');
+    document.getElementById('saqueInput').value = '';
+    document.querySelectorAll('.amount-chip').forEach(b => b.classList.remove('selected'));
+    updateUI();
+    showToast(`Saque de ${formatBRL(val)} realizado!`, 'success');
+  }
+
+  function efetuarDeposito() {
+    const val = parseFloat(document.getElementById('depositoInput').value);
+    if (!val || val <= 0) { showToast('Informe um valor válido', 'error'); return; }
+    state.saldo += val;
+    state.totalDepositado += val;
+    addTx('deposito', `Depósito de ${formatBRL(val)}`, val);
+    closeModal('modalDeposito');
+    document.getElementById('depositoInput').value = '';
+    updateUI();
+    showToast(`Depósito de ${formatBRL(val)} realizado!`, 'success');
+  }
+
+  function efetuarInvestimento() {
+    const sel = document.getElementById('investEmpresa').value;
+    const qtd = parseInt(document.getElementById('investQtd').value);
+    if (!sel) { showToast('Selecione uma empresa', 'error'); return; }
+    if (!qtd || qtd < 1) { showToast('Informe a quantidade', 'error'); return; }
+    const [nome, preco] = sel.split('|');
+    const total = parseFloat(preco) * qtd;
+    if (state.saldo < total) { showToast('Saldo insuficiente!', 'error'); return; }
+    state.saldo -= total;
+    addTx('investimento', `Compra de ${qtd} cota(s) de ${nome}`, total);
+    if (!state.carteira[nome]) state.carteira[nome] = { qtd: 0, custo: 0 };
+    state.carteira[nome].qtd += qtd;
+    state.carteira[nome].custo += total;
+    closeModal('modalInvestir');
+    document.getElementById('investEmpresa').value = '';
+    document.getElementById('investQtd').value = '';
+    document.getElementById('investTotal').style.display = 'none';
+    updateUI();
+    renderCarteira();
+    showToast(`${qtd} cota(s) de ${nome} compradas!`, 'success');
+  }
+
+  // Calc invest total live
+  function calcInvestTotal() {
+    const sel = document.getElementById('investEmpresa').value;
+    const qtd = parseInt(document.getElementById('investQtd').value);
+    const el = document.getElementById('investTotal');
+    if (sel && qtd > 0) {
+      const [, preco] = sel.split('|');
+      el.textContent = `Total: ${formatBRL(parseFloat(preco) * qtd)}`;
+      el.style.display = 'block';
+    } else { el.style.display = 'none'; }
+  }
+
+  document.getElementById('investEmpresa').addEventListener('change', calcInvestTotal);
+  document.getElementById('investQtd').addEventListener('input', calcInvestTotal);
+
+  // ── PIX ──
+  function enviarPix() {
+    const key = document.getElementById('pixKeyInput').value.trim();
+    const amt = parseFloat(document.getElementById('pixAmount').value);
+    if (!key) { showToast('Informe a chave Pix', 'error'); return; }
+    if (!amt || amt <= 0) { showToast('Informe o valor', 'error'); return; }
+    if (state.saldo < amt) { showToast('Saldo insuficiente!', 'error'); return; }
+    state.saldo -= amt;
+    addTx('pix', `Pix para ${key}`, amt);
+    document.getElementById('pixKeyInput').value = '';
+    document.getElementById('pixAmount').value = '';
+    document.getElementById('pixDesc').value = '';
+    updateUI();
+    showToast(`Pix de ${formatBRL(amt)} enviado! ⚡`, 'success');
+  }
+
+  // ── NAVIGATION ──
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    event.currentTarget && event.currentTarget.classList.add('active');
+  }
+
+  // ── TOAST ──
+  function showToast(msg, type = '') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${type==='success'?'✓':type==='error'?'✕':'ℹ'}</span> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // ── DATE ──
+  const now = new Date();
+  document.getElementById('welcomeDate').textContent = now.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // ── LOGIN ENTER ──
+  document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  document.getElementById('welcomeTitle').textContent = 'Olá, visitante 👋';
+</script>
+</body>
+</html>
