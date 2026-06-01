@@ -149,10 +149,8 @@ Contribuições são bem-vindas! Sinta-se à vontade para:
 
 ## 👤 Autor
 
-**[Seu Nome]**
+**Pedro Ruan**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/[seu-perfil])
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/[seu-usuario])
 
 ---
 
